@@ -1,0 +1,51 @@
+# Docker Compose file Reference (https://docs.docker.com/compose/compose-file/)
+version: '3'
+
+#Define services
+services:
+
+  #PostgreSQL Database for the application
+  db-postgres:
+    image: "postgres:9.6-alpine"
+    container_name: db-postgres
+    #Volume mounted for database for the storage
+    volumes:
+      - data-app:/var/lib/postgresql/data
+    ports:
+      - 5432:5432 # Forward the exposed port 5432 on the container to port 5432 on the host machine
+
+    #Environment variable for DB name, user and password
+    environment:
+      - POSTGRES_DB=epshlxbv
+      - POSTGRES_USER=epshlxbv
+      - POSTGRES_PASSWORD=a-6XJfVXSIFzaho5EDdQ1-bIWUH_sxO3
+
+  #Back-end Spring Boot Application
+  generador-consultas-back:
+    #The docker file in generador-consultas-back build the jar and provides the docker image with the following name.
+    build: ./generador-consultas-back
+    container_name: generador-consultas-back
+
+    #Environment variables for Spring Boot Application.
+    environment:
+      - DB_SERVER=isabelle.db.elephantsql.com
+      - POSTGRES_DB=DB=epshlxbv
+      - POSTGRES_USER=epshlxbv
+      - POSTGRES_PASSWORD=a-6XJfVXSIFzaho5EDdQ1-bIWUH_sxO3
+    ports:
+      - 8080:8080 # Forward the exposed port 8080 on the container to port 8080 on the host machine
+    links:
+      - db-postgres
+
+  #Fron-end Angular Application
+  generador-consultas-front:
+    build: ./generador-consultas-front
+    container_name: generador-consultas-front
+    ports:
+      - 9000:80
+    links:
+      - generador-consultas-back
+
+#Volumes for DB data
+volumes:
+  data-app:
